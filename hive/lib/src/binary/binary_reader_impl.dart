@@ -351,8 +351,7 @@ class BinaryReaderImpl extends BinaryReader {
         return readList().toSet();
       default:
         final resolved = _typeRegistry.findAdapterForTypeId(typeId);
-        if (resolved == null) {
-          throw HiveError('''
+        assert(resolved != null, '''
 Cannot read, unknown typeId: $typeId. Did you forget to register an adapter?
 
 If you recently migrated to the GenerateAdapters annotation, make sure to follow
@@ -368,8 +367,11 @@ IsolatedHive to prevent this in the future. Examples of isolate usage include:
 - background_fetch
 - Push notification processing (firebase_cloud_messaging, etc.)
 ''');
+        if (resolved == null) {
+          return null;
+        } else {
+          return resolved.adapter.read(this);
         }
-        return resolved.adapter.read(this);
     }
   }
 
